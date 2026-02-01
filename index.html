@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Palette Generator</title>
+    <!-- The link below is from cdnjs, search font-awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+    <div class="container">
+        <h1>Color Palette Generator</h1>
+        
+        <!-- Controls Section -->
+        <div class="controls-section">
+            <!-- Base Color Picker -->
+            <div class="control-group">
+                <label for="base-color">Base Color:</label>
+                <input type="color" id="base-color" value="#F63049">
+            </div>
+
+            <!-- Palette Mode Selector -->
+            <div class="control-group">
+                <label for="palette-mode">Palette Mode:</label>
+                <select id="palette-mode">
+                    <option value="monochromatic">Monochromatic</option>
+                    <option value="analogous">Analogous</option>
+                    <option value="complementary">Complementary</option>
+                    <option value="triadic">Triadic</option>
+                </select>
+            </div>
+
+            <!-- Number of Colors -->
+            <div class="control-group">
+                <label for="num-colors">Number of Colors: <span id="num-colors-value">5</span></label>
+                <input type="range" id="num-colors" min="3" max="10" value="5">
+            </div>
+
+            <!-- Hue Shift -->
+            <div class="control-group">
+                <label for="hue-shift">Hue Shift: <span id="hue-shift-value">0°</span></label>
+                <input type="range" id="hue-shift" min="-180" max="180" value="0">
+            </div>
+
+            <!-- Saturation -->
+            <div class="control-group">
+                <label for="saturation">Saturation: <span id="saturation-value">50%</span></label>
+                <input type="range" id="saturation" min="0" max="100" value="50">
+            </div>
+
+            <!-- Lightness -->
+            <div class="control-group">
+                <label for="lightness">Lightness: <span id="lightness-value">50%</span></label>
+                <input type="range" id="lightness" min="0" max="100" value="50">
+            </div>
+
+            <!-- Buttons -->
+            <div class="button-group">
+                <button id="generate-btn">
+                    <i class="fas fa-sync-alt"></i>
+                    Generate Palette
+                </button>
+                <button id="reset-btn">
+                    <i class="fas fa-undo"></i>
+                    Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- Palette Display -->
+        <div class="palette-container" id="palette-container">
+            <!-- Color boxes will be dynamically generated -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
