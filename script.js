@@ -10,6 +10,11 @@ const lightnessInput = document.getElementById("lightness");
 const generateBtn = document.getElementById("generate-btn");
 const resetBtn = document.getElementById("reset-btn");
 const paletteContainer = document.getElementById("palette-container");
+const savePaletteBtn = document.getElementById("save-palette-btn");
+const viewSavedBtn = document.getElementById("view-saved-btn");
+const savedPanel = document.getElementById("saved-panel");
+const closePanelBtn = document.getElementById("close-panel");
+const savedPalettesContainer = document.getElementById("saved-palettes-container");
 
 // Value display elements
 const numColorsValue = document.getElementById("num-colors-value");
@@ -21,28 +26,47 @@ const lightnessValue = document.getElementById("lightness-value");
 // STATE MANAGEMENT
 // ========================================
 let lockedColors = new Set(); // Track which color indices are locked
+let savedPalettes = JSON.parse(localStorage.getItem('savedPalettes')) || []; // Load saved palettes from localStorage
 
 // ========================================
 // EVENT LISTENERS
 // ========================================
-generateBtn.addEventListener("click", generatePalette);
+generateBtn.addEventListener("click", () => {
+    // Add spinning animation
+    paletteContainer.classList.add("spinning");
+    
+    // Generate palette after animation completes
+    setTimeout(() => {
+        generatePalette();
+        paletteContainer.classList.remove("spinning");
+    }, 1000);
+});
+
 resetBtn.addEventListener("click", resetControls);
+savePaletteBtn.addEventListener("click", savePalette);
+viewSavedBtn.addEventListener("click", toggleSavedPanel);
+closePanelBtn.addEventListener("click", closeSavedPanel);
 
 // Real-time updates when controls change
 baseColorInput.addEventListener("input", generatePalette);
+
 paletteModeSelect.addEventListener("change", generatePalette);
+
 numColorsInput.addEventListener("input", () => {
     numColorsValue.textContent = numColorsInput.value;
     generatePalette();
 });
+
 hueShiftInput.addEventListener("input", () => {
     hueShiftValue.textContent = `${hueShiftInput.value}°`;
     generatePalette();
 });
+
 saturationInput.addEventListener("input", () => {
     saturationValue.textContent = `${saturationInput.value}%`;
     generatePalette();
 });
+
 lightnessInput.addEventListener("input", () => {
     lightnessValue.textContent = `${lightnessInput.value}%`;
     generatePalette();
@@ -76,6 +100,25 @@ paletteContainer.addEventListener("click", (e) => {
         const hexValue = hexEl ? hexEl.textContent : "";
         const copyBtnEl = details ? details.querySelector(".copy-btn") : null;
         copyToClipboard(hexValue, copyBtnEl);
+    }
+});
+
+// Click handler for saved palettes
+savedPalettesContainer.addEventListener("click", (e) => {
+    // Handle delete button
+    const deleteBtn = e.target.closest(".delete-saved-btn");
+    if (deleteBtn) {
+        const paletteId = parseInt(deleteBtn.dataset.id);
+        deleteSavedPalette(paletteId);
+        return;
+    }
+
+    // Handle load button
+    const loadBtn = e.target.closest(".load-saved-btn");
+    if (loadBtn) {
+        const paletteId = parseInt(loadBtn.dataset.id);
+        loadSavedPalette(paletteId);
+        return;
     }
 });
 
@@ -455,6 +498,184 @@ function resetControls() {
     
     // Regenerate palette
     generatePalette();
+}
+
+// ========================================
+// SAVE & LOAD PALETTES
+// ========================================
+
+/**
+ * Save current palette to localStorage
+ */
+function savePalette() {
+    const colorBoxes = paletteContainer.querySelectorAll('.color-box');
+    const colors = Array.from(colorBoxes).map(box => {
+        return box.querySelector('.hex-value').textContent;
+    });
+    
+    if (colors.length === 0) {
+        alert('No palette to save!');
+        return;
+    }
+    
+    const palette = {
+        id: Date.now(),
+        colors: colors,
+        date: new Date().toLocaleString()
+    };
+    
+    savedPalettes.unshift(palette); // Add to beginning of array
+    localStorage.setItem('savedPalettes', JSON.stringify(savedPalettes));
+    
+    // Show success feedback
+    showSaveSuccess();
+    
+    // Update saved palettes display
+    renderSavedPalettes();
+}
+
+/**
+ * Show visual feedback when palette is saved
+ */
+function showSaveSuccess() {
+    const originalText = savePaletteBtn.innerHTML;
+    savePaletteBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+    savePaletteBtn.style.background = 'linear-gradient(45deg, #48bb78, #38a169)';
+    
+    setTimeout(() => {
+        savePaletteBtn.innerHTML = originalText;
+        savePaletteBtn.style.background = '';
+    }, 1500);
+}
+
+/**
+ * Render saved palettes in the side panel
+ */
+function renderSavedPalettes() {
+    savedPalettesContainer.innerHTML = '';
+    
+    if (savedPalettes.length === 0) {
+        savedPalettesContainer.innerHTML = '<p class="no-palettes">No saved palettes yet. Create and save your favorite color combinations!</p>';
+        return;
+    }
+    
+    savedPalettes.forEach((palette) => {
+        const paletteCard = document.createElement('div');
+        paletteCard.className = 'saved-palette-card';
+        
+        const colorsHTML = palette.colors.map(color => 
+            `<div class="saved-color" style="background-color: ${color};" title="${color}"></div>`
+        ).join('');
+        
+        paletteCard.innerHTML = `
+            <div class="saved-palette-colors">
+                ${colorsHTML}
+            </div>
+            <div class="saved-palette-info">
+                <span class="saved-date">${palette.date}</span>
+                <div class="saved-actions">
+                    <button class="load-saved-btn" data-id="${palette.id}" title="Load this palette">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="delete-saved-btn" data-id="${palette.id}" title="Delete this palette">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        savedPalettesContainer.appendChild(paletteCard);
+    });
+}
+
+/**
+ * Load a saved palette
+ * @param {number} paletteId - ID of the palette to load
+ */
+function loadSavedPalette(paletteId) {
+    const palette = savedPalettes.find(p => p.id === paletteId);
+    if (!palette) return;
+    
+    renderPalette(palette.colors);
+    closeSavedPanel();
+}
+
+/**
+ * Delete a saved palette
+ * @param {number} paletteId - ID of the palette to delete
+ */
+function deleteSavedPalette(paletteId) {
+    showDeleteConfirmation(paletteId);
+}
+
+/**
+ * Show custom delete confirmation popup
+ * @param {number} paletteId - ID of the palette to delete
+ */
+function showDeleteConfirmation(paletteId) {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'delete-overlay';
+    
+    // Create popup
+    const popup = document.createElement('div');
+    popup.className = 'delete-popup';
+    popup.innerHTML = `
+        <h3>Delete Palette?</h3>
+        <p>Are you sure you want to delete this palette? This action cannot be undone.</p>
+        <div class="popup-buttons">
+            <button class="popup-cancel-btn">Cancel</button>
+            <button class="popup-confirm-btn">Delete</button>
+        </div>
+    `;
+    
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+    
+    // Animate in
+    setTimeout(() => overlay.classList.add('show'), 10);
+    
+    // Handle cancel
+    popup.querySelector('.popup-cancel-btn').addEventListener('click', () => {
+        overlay.classList.remove('show');
+        setTimeout(() => overlay.remove(), 300);
+    });
+    
+    // Handle confirm
+    popup.querySelector('.popup-confirm-btn').addEventListener('click', () => {
+        savedPalettes = savedPalettes.filter(p => p.id !== paletteId);
+        localStorage.setItem('savedPalettes', JSON.stringify(savedPalettes));
+        renderSavedPalettes();
+        
+        overlay.classList.remove('show');
+        setTimeout(() => overlay.remove(), 300);
+    });
+    
+    // Close on overlay click
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            overlay.classList.remove('show');
+            setTimeout(() => overlay.remove(), 300);
+        }
+    });
+}
+
+
+/**
+ * Toggle saved palettes panel
+ */
+function toggleSavedPanel() {
+    savedPanel.classList.toggle('open');
+    if (savedPanel.classList.contains('open')) {
+        renderSavedPalettes();
+    }
+}
+
+/**
+ * Close saved palettes panel
+ */
+function closeSavedPanel() {
+    savedPanel.classList.remove('open');
 }
 
 // ========================================

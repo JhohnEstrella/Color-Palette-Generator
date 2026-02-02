@@ -9,6 +9,25 @@
     <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
+    <!-- View Saved Palettes Button (Fixed Position) -->
+    <button id="view-saved-btn">
+        <i class="fas fa-folder-open"></i>
+        Saved Palettes
+    </button>
+
+    <!-- Saved Palettes Side Panel -->
+    <div class="saved-panel" id="saved-panel">
+        <div class="panel-header">
+            <h2>Saved Palettes</h2>
+            <button id="close-panel">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="saved-palettes-container" id="saved-palettes-container">
+            <!-- Saved palettes will be dynamically inserted here -->
+        </div>
+    </div>
+
     <div class="container">
         <h1>Color Palette Generator</h1>
         
@@ -71,6 +90,13 @@
         <!-- Palette Display -->
         <div class="palette-container" id="palette-container">
             <!-- Color boxes will be dynamically generated -->
+        </div>
+        <!-- Save Palette Section -->
+        <div class="save-section">
+            <button id="save-palette-btn">
+                <i class="fas fa-save"></i>
+                Save Palette
+            </button>
         </div>
     </div>
 

@@ -241,6 +241,40 @@ h1::after{
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 }
 
+/* Spinning animation for individual color boxes */
+.palette-container.spinning .color-box {
+    animation: colorBoxSpin 1s ease;
+}
+
+/* Locked colors don't spin */
+.palette-container.spinning .color-box.locked {
+    animation: none;
+}
+
+/* Stagger the animation for each box */
+.palette-container.spinning .color-box:nth-child(1) { animation-delay: 0s; }
+.palette-container.spinning .color-box:nth-child(2) { animation-delay: 0.08s; }
+.palette-container.spinning .color-box:nth-child(3) { animation-delay: 0.16s; }
+.palette-container.spinning .color-box:nth-child(4) { animation-delay: 0.24s; }
+.palette-container.spinning .color-box:nth-child(5) { animation-delay: 0.32s; }
+.palette-container.spinning .color-box:nth-child(6) { animation-delay: 0.4s; }
+.palette-container.spinning .color-box:nth-child(7) { animation-delay: 0.48s; }
+.palette-container.spinning .color-box:nth-child(8) { animation-delay: 0.56s; }
+.palette-container.spinning .color-box:nth-child(9) { animation-delay: 0.64s; }
+.palette-container.spinning .color-box:nth-child(10) { animation-delay: 0.72s; }
+
+@keyframes colorBoxSpin {
+    0% {
+        transform: rotate(-360deg) scale(1);
+    }
+    /* 50% {
+        transform: rotate(180deg) scale(0.9);
+    } */
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
 .color-box{
     border-radius: 10px;
     overflow: hidden;
@@ -306,6 +340,298 @@ h1::after{
 }
 
 /* ========================================
+   SAVE PALETTE SECTION
+   ======================================== */
+
+.save-section {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+#save-palette-btn {
+    background: linear-gradient(45deg, #8b5cf6, #6366f1);
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+#save-palette-btn:hover {
+    translate: 0 -2px;
+    box-shadow: 0 6px 10px rgba(139, 92, 246, 0.4);
+}
+
+#save-palette-btn:active {
+    translate: 0;
+}
+
+#save-palette-btn i {
+    margin-right: 0.5rem;
+}
+
+/* ========================================
+   VIEW SAVED BUTTON (Fixed Position)
+   ======================================== */
+
+#view-saved-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(45deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+    z-index: 100;
+}
+
+#view-saved-btn:hover {
+    translate: 0 -2px;
+    box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+}
+
+#view-saved-btn i {
+    margin-right: 0.5rem;
+}
+
+/* ========================================
+   SAVED PALETTES SIDE PANEL
+   ======================================== */
+
+.saved-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100vh;
+    background-color: white;
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.2);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.saved-panel.open {
+    right: 0;
+}
+
+.panel-header {
+    padding: 1.5rem;
+    background: linear-gradient(45deg, #F63049, #111F35);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.panel-header h2 {
+    font-size: 1.3rem;
+    margin: 0;
+}
+
+#close-panel {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+#close-panel:hover {
+    transform: rotate(90deg);
+}
+
+.saved-palettes-container {
+    padding: 1rem;
+}
+
+.no-palettes {
+    text-align: center;
+    color: #6c757d;
+    padding: 2rem 1rem;
+    font-style: italic;
+}
+
+.saved-palette-card {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.saved-palette-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.saved-palette-colors {
+    display: flex;
+    gap: 0.3rem;
+    margin-bottom: 0.8rem;
+    border-radius: 6px;
+    overflow: hidden;
+    height: 60px;
+}
+
+.saved-color {
+    flex: 1;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.saved-color:hover {
+    transform: scale(1.05);
+}
+
+.saved-palette-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.saved-date {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.saved-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.load-saved-btn,
+.delete-saved-btn {
+    background: none;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.load-saved-btn {
+    color: #10b981;
+}
+
+.load-saved-btn:hover {
+    background-color: #d1fae5;
+    transform: scale(1.1);
+}
+
+.delete-saved-btn {
+    color: #ef4444;
+}
+
+.delete-saved-btn:hover {
+    background-color: #fee2e2;
+    transform: scale(1.1);
+}
+
+/* ========================================
+   CUSTOM DELETE CONFIRMATION POPUP
+   ======================================== */
+
+.delete-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.delete-overlay.show {
+    opacity: 1;
+}
+
+.delete-popup {
+    background-color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+}
+
+.delete-overlay.show .delete-popup {
+    transform: scale(1);
+}
+
+.delete-popup h3 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.delete-popup p {
+    margin: 0 0 1.5rem 0;
+    color: #666;
+    line-height: 1.6;
+}
+
+.popup-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.popup-cancel-btn,
+.popup-confirm-btn {
+    flex: 1;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.popup-cancel-btn {
+    background-color: #e9ecef;
+    color: #333;
+}
+
+.popup-cancel-btn:hover {
+    background-color: #dee2e6;
+    transform: translateY(-2px);
+}
+
+.popup-confirm-btn {
+    background: linear-gradient(45deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.popup-confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(239, 68, 68, 0.4);
+}
+
+
+/* ========================================
    RESPONSIVE DESIGN
    ======================================== */
 
@@ -325,6 +651,18 @@ h1::after{
     .controls-section {
         padding: 1rem;
     }
+
+    .saved-panel {
+        width: 100%;
+        right: -100%;
+    }
+    
+    #view-saved-btn {
+        top: 10px;
+        right: 10px;
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
 }
 
 @media(max-width: 480px){
@@ -338,5 +676,14 @@ h1::after{
     
     .palette-container {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    #view-saved-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    
+    .saved-panel {
+        width: 100%;
     }
 }
