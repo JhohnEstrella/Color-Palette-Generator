@@ -222,6 +222,37 @@ function hslToHex(h, s, l) {
 // ========================================
 
 /**
+ * Ensure a generated color is unique within the colors array
+ * @param {string} color - Generated hex color
+ * @param {Array} existingColors - Array of existing hex colors
+ * @param {number} h - Hue value to adjust
+ * @param {number} s - Saturation value
+ * @param {number} l - Lightness value
+ * @returns {string} - Unique hex color
+ */
+function ensureUniqueColor(color, existingColors, h, s, l) {
+    let uniqueColor = color;
+    let attempts = 0;
+    const maxAttempts = 100;
+    
+    // Check if color already exists
+    while (existingColors.includes(uniqueColor) && attempts < maxAttempts) {
+        // Try adjusting lightness first
+        if (attempts < 50) {
+            const adjustedL = l + (attempts % 2 === 0 ? attempts : -attempts);
+            uniqueColor = hslToHex(h, s, adjustedL);
+        } else {
+            // If that fails, adjust hue slightly
+            const adjustedH = h + (attempts - 50);
+            uniqueColor = hslToHex(adjustedH, s, l);
+        }
+        attempts++;
+    }
+    
+    return uniqueColor;
+}
+
+/**
  * Generate monochromatic palette (same hue, varying saturation/lightness)
  * @param {Object} baseHSL - Base HSL color
  * @param {number} count - Number of colors to generate
@@ -239,7 +270,14 @@ function generateMonochromatic(baseHSL, count) {
         // Keep saturation relatively high for vibrant colors
         const s = 70 - (i * 5); // Gradually decrease saturation
         
-        colors.push(hslToHex(h, Math.max(20, s), l));
+        let color = hslToHex(h, Math.max(20, s), l);
+        
+        // Ensure the color is unique
+        if (colors.includes(color)) {
+            color = ensureUniqueColor(color, colors, h, Math.max(20, s), l);
+        }
+        
+        colors.push(color);
     }
     
     return colors;
@@ -267,7 +305,14 @@ function generateAnalogous(baseHSL, count) {
         const newS = s + (Math.random() * 20 - 10);
         const newL = l + (Math.random() * 20 - 10);
         
-        colors.push(hslToHex(newHue, newS, newL));
+        let color = hslToHex(newHue, newS, newL);
+        
+        // Ensure the color is unique
+        if (colors.includes(color)) {
+            color = ensureUniqueColor(color, colors, newHue, newS, newL);
+        }
+        
+        colors.push(color);
     }
     
     return colors;
@@ -284,11 +329,19 @@ function generateComplementary(baseHSL, count) {
     const { h, s, l } = baseHSL;
     
     // Add base color
-    colors.push(hslToHex(h, s, l));
+    let color = hslToHex(h, s, l);
+    colors.push(color);
     
     // Add complementary color (180 degrees opposite)
     if (count > 1) {
-        colors.push(hslToHex(h + 180, s, l));
+        let compColor = hslToHex(h + 180, s, l);
+        
+        // Ensure complementary color is unique
+        if (colors.includes(compColor)) {
+            compColor = ensureUniqueColor(compColor, colors, h + 180, s, l);
+        }
+        
+        colors.push(compColor);
     }
     
     // Fill remaining with variations
@@ -298,7 +351,14 @@ function generateComplementary(baseHSL, count) {
         
         // Vary lightness
         const lightnessOffset = (i / count) * 40 - 20;
-        colors.push(hslToHex(baseHue, s - 10, l + lightnessOffset));
+        let varColor = hslToHex(baseHue, s - 10, l + lightnessOffset);
+        
+        // Ensure variation color is unique
+        if (colors.includes(varColor)) {
+            varColor = ensureUniqueColor(varColor, colors, baseHue, s - 10, l + lightnessOffset);
+        }
+        
+        colors.push(varColor);
     }
     
     return colors;
@@ -325,7 +385,14 @@ function generateTriadic(baseHSL, count) {
         const lightnessVariation = Math.floor(i / 3) * 15;
         const newL = l + lightnessVariation - 15;
         
-        colors.push(hslToHex(currentHue, s, newL));
+        let color = hslToHex(currentHue, s, newL);
+        
+        // Ensure the color is unique
+        if (colors.includes(color)) {
+            color = ensureUniqueColor(color, colors, currentHue, s, newL);
+        }
+        
+        colors.push(color);
     }
     
     return colors;
