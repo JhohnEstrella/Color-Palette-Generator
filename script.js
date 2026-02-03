@@ -77,8 +77,8 @@ paletteContainer.addEventListener("click", (e) => {
     // Handle copy button clicks
     const copyBtn = e.target.closest(".copy-btn");
     if (copyBtn) {
-        const hexElement = copyBtn.previousElementSibling;
-        const hexValue = hexElement ? hexElement.textContent : "";
+        const colorBox = copyBtn.closest(".color-box");
+        const hexValue = colorBox.querySelector(".hex-value").textContent;
         copyToClipboard(hexValue, copyBtn);
         return;
     }
@@ -413,6 +413,16 @@ function generatePalette() {
     const saturationAdjust = parseInt(saturationInput.value);
     const lightnessAdjust = parseInt(lightnessInput.value);
     
+    // **SAVE LOCKED COLORS BEFORE GENERATING**
+    const previousColors = {};
+    const colorBoxes = paletteContainer.querySelectorAll('.color-box');
+    colorBoxes.forEach((box, index) => {
+        if (lockedColors.has(index)) {
+            const hexValue = box.querySelector('.hex-value').textContent;
+            previousColors[index] = hexValue;
+        }
+    });
+    
     // Convert base color to HSL
     let baseHSL = hexToHSL(baseColor);
     
@@ -420,8 +430,6 @@ function generatePalette() {
     baseHSL.h = (baseHSL.h + hueShift) % 360;
     if (baseHSL.h < 0) baseHSL.h += 360;
     
-    // For saturation and lightness, blend with adjustment values
-    // This gives more intuitive control
     baseHSL.s = saturationAdjust;
     baseHSL.l = lightnessAdjust;
     
@@ -443,6 +451,11 @@ function generatePalette() {
         default:
             colors = generateMonochromatic(baseHSL, numColors);
     }
+    
+    // **RESTORE LOCKED COLORS**
+    Object.keys(previousColors).forEach(index => {
+        colors[parseInt(index)] = previousColors[index];
+    });
     
     renderPalette(colors);
 }
